@@ -5,13 +5,24 @@ import sys
 import glob
 from numpy import byte
 import serial
+import matplotlib as mpl
+import seaborn as sns
+from matplotlib.colors import LogNorm
+import math
+import seaborn as sn
+from sklearn import preprocessing   
+
+
 
 x = 10
 p = -15
 pre_cursor = []
 post_cursor = []
+buff_str_var = []
+BERT_Value = np.empty((26, 26))
+BERT_Normalize_Value = np.empty((26, 26))
 
-while x > -15:
+while x > -16:
 
     pre_cursor.append(str(x))
     post_cursor.append(str(p))
@@ -46,39 +57,82 @@ def serial_ports():
             pass
     return result
 
-
 list_ports = serial_ports()
 print(list_ports)
-
 Checker = serial.Serial("COM26", 115200)  # open serial port
-
 Checker.write(bytes("cmd_start_callib_FIR", encoding="utf-8")) 
 
+#norm = mpl.colors.Normalize(vmin=0.,vmax=1000000000.)
 
-BERT_Value = np.empty((26, 26))
+def normalize(ptr):
+    #min_max_scaler = preprocessing.MinMaxScaler()  
+    #BERT_Normalize_Value = min_max_scaler.fit_transform(ptr)  
 
 
-while True:
-    for b in range(26):
-        for n in range(26):
-            string_reccive = str(Checker.readline(), 'UTF-8').replace('\n', '')
-            string_reccive = string_reccive.split(',')
+    BERT_Normalize_Value =preprocessing.normalize(ptr)
 
-            var = float(str(string_reccive[0]))
-            BERT_Value[b, n] = var
-            print( BERT_Value[b, n], string_reccive)
+    return BERT_Normalize_Value
 
-    fig, ax = plt.subplots()
-    im = ax.imshow(BERT_Value, cmap = cm.magma)
+    #return BERT_Normalize_Value
 
-    # Show all ticks and label them with the respective list entries
-    ax.set_xticks(np.arange(len(post_cursor)), labels=post_cursor)
-    ax.set_yticks(np.arange(len(pre_cursor)), labels=pre_cursor)
 
-    # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
 
-    ax.set_title("Fir sweep space")
-    fig.tight_layout()
-    plt.show()
+'''
+def normalize(ptr):
+    for x in range(26):
+        for i in range(26):
+            if BERT_Value[x,i] >= 9000000000:
+                BERT_Normalize_Value[x,i] = 2
+            if BERT_Value[x,i] < 9000000000 and ptr[x,i] > 200:
+                BERT_Normalize_Value[x,i] = 1
+            if BERT_Value[x,i] < 200:
+                BERT_Normalize_Value[x,i] = 0
+    return BERT_Normalize_Value
+
+
+for b in range(26):
+    for n in range(26):
+        string_reccive = str(Checker.readline(), 'UTF-8').replace('\n', '')
+        string_reccive = string_reccive.split(',')
+
+        var = string_reccive
+        buff_str_var += var
+
+        BERT_Value[b, n] = int(str(var[0]))
+        print( BERT_Value[b, n], string_reccive)
+'''
+#np.savetxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt', BERT_Value, fmt='%s, \n')
+#BERT_Value = np.loadtxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt', dtype=str)
+#BERT_Value = str(BERT_Value).replace(', \n', '')
+#np.savetxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt', BERT_Value, fmt='%d, \n')
+#file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt", "wb")
+'''
+file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt", "wb")
+# save array to the file
+np.save(file, BERT_Value)
+# close the file
+file.close
+'''
+
+
+# open the file in read binary mode
+file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt", "rb")
+#read the file to numpy array
+BERT_Value = np.load(file)
+#close the file
+
+
+fig, ax = plt.subplots()
+im = ax.imshow(normalize(BERT_Value), cmap = cm.magma)
+
+# Show all ticks and label them with the respective list entries
+ax.set_xticks(np.arange(len(post_cursor)), labels=post_cursor)
+ax.set_yticks(np.arange(len(pre_cursor)), labels=pre_cursor)
+
+# Rotate the tick labels and set their alignment.
+plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+         rotation_mode="anchor")
+
+ax.set_title("Fir sweep space")
+fig.tight_layout()
+plt.show()
