@@ -3,13 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import sys
 import glob
-from numpy import byte
 import serial
-import matplotlib as mpl
-import seaborn as sns
-from matplotlib.colors import LogNorm
-import math
-import seaborn as sn
 from sklearn import preprocessing   
 
 
@@ -69,7 +63,7 @@ def normalize(ptr):
     #BERT_Normalize_Value = min_max_scaler.fit_transform(ptr)  
 
 
-    BERT_Normalize_Value =preprocessing.normalize(ptr)
+    BERT_Normalize_Value = preprocessing.normalize(ptr)
 
     return BERT_Normalize_Value
 
@@ -88,7 +82,7 @@ def normalize(ptr):
             if BERT_Value[x,i] < 200:
                 BERT_Normalize_Value[x,i] = 0
     return BERT_Normalize_Value
-
+'''
 
 for b in range(26):
     for n in range(26):
@@ -98,29 +92,29 @@ for b in range(26):
         var = string_reccive
         buff_str_var += var
 
-        BERT_Value[b, n] = int(str(var[0]))
+        BERT_Value[b, n] = int(str(var[0])) + 1
         print( BERT_Value[b, n], string_reccive)
-'''
+
 #np.savetxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt', BERT_Value, fmt='%s, \n')
 #BERT_Value = np.loadtxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt', dtype=str)
 #BERT_Value = str(BERT_Value).replace(', \n', '')
 #np.savetxt('C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt', BERT_Value, fmt='%d, \n')
 #file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data.txt", "wb")
-'''
-file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt", "wb")
+
+file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data3.txt", "wb")
 # save array to the file
 np.save(file, BERT_Value)
 # close the file
 file.close
+
+
 '''
-
-
 # open the file in read binary mode
 file = open("C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/Chaecker_data2.txt", "rb")
 #read the file to numpy array
 BERT_Value = np.load(file)
 #close the file
-
+'''
 
 fig, ax = plt.subplots()
 im = ax.imshow(normalize(BERT_Value), cmap = cm.magma)
