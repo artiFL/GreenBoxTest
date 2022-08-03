@@ -6,25 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing   
 from matplotlib import cm
-import os
 
-
-path_to_save_file_source = "C:/Users/flegler.a/Desktop/Work_space/CubeIDE/Checker/GreenBoxPython/GreenBoxTest/Data"
-#path_to_save_file_backup = os.getcwd()
-#print(path_to_save_file_backup)
-Channel_Checker = 3
-TimeStamp = 2
-Speed = 0
-
-
-x = 10
-p = -15
-pre_cursor = []
-post_cursor = []
-buff_str_var = []
-BERT_Value = np.empty((26, 26))
-BERT_Normalize_Value = np.empty((26, 26))
-Build_time = ""
 
 
 def getport() -> str:
@@ -41,6 +23,22 @@ def normalize(ptr):
     BERT_Normalize_Value = preprocessing.normalize(ptr)
     return BERT_Normalize_Value
 
+
+path_to_save_file_backup = "C:/Users/flegler.a/Desktop/GreenBoxPython/GreenBoxTest/"
+Channel_Checker = 3
+TimeStamp = 2
+
+
+x = 10
+p = -15
+pre_cursor = []
+post_cursor = []
+buff_str_var = []
+BERT_Value = np.empty((26, 26))
+BERT_Normalize_Value = np.empty((26, 26))
+Build_time = ""
+
+
 while x > -16:
 
     pre_cursor.append(str(x))
@@ -52,7 +50,7 @@ while x > -16:
 
 def main():
     buff_str_var = []
-    nameModule = ""
+
 
     Checker = serial.Serial(getport(), 115200)  # open serial port
 
@@ -71,11 +69,12 @@ def main():
         print(Fore.RED + f"Version Sowftware - {version_Checker[0]}\nVersion Hardware - {version_Checker[1]}\nSerial Number - {version_Checker[2]}")
         print(Fore.WHITE + "Succes connect")
 
-    path_to_save_file_backup = path_to_save_file_source + str(version_Checker[2]) + "_Channel" + str(Channel_Checker)
+    path_to_save_file_backup = str(version_Checker[2]) + "_Channel" + str(Channel_Checker) + ".txt"
 
     time.sleep(1)
-    Checker.write(bytes(f"cmd_start_callib_FIR {Channel_Checker} {TimeStamp} {Speed}", encoding="utf-8")) 
+    Checker.write(bytes(f"cmd_start_callib_FIR {Channel_Checker} {TimeStamp}", encoding="utf-8")) 
     time.sleep(1)
+
 
     flag = True
     ack_speed = ""
@@ -87,12 +86,10 @@ def main():
         if "Clock is set" in ack_speed:
             flag = False
 
-    nameModule = str(Checker.readline(), 'UTF-8')
-
     print(ack_speed)
 
-    for b in range(2):
-        for n in range(2):
+    for b in range(26):
+        for n in range(26):
             string_reccive = str(Checker.readline(), 'UTF-8').replace('\n', '')
             string_reccive = string_reccive.split(',')
 
@@ -104,10 +101,10 @@ def main():
 
     Checker.close()
 
-    file = open(path_to_save_file_backup + ".txt", "wb")
+    file = open(path_to_save_file_backup, "wb")
     # save array to the file
     np.save(file, BERT_Value)
-    print("File save to - " + path_to_save_file_backup + ".txt")
+    print("File save to - " + path_to_save_file_backup)
 
     # close the file
     file.close
@@ -124,11 +121,14 @@ def main():
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
 
-    ax.set_title(f"Fir sweep {nameModule}")
+    ax.set_title("Fir sweep space")
     fig.tight_layout()
     plt.show()
+    fig.savefig(str(version_Checker[2]) + "_Channel" + str(Channel_Checker))
 
-    fig.savefig(path_to_save_file_backup)
+
+
+
 
 
 if __name__ == "__main__":
